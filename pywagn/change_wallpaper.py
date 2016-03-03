@@ -14,9 +14,9 @@ SHELL_COMMAND = "gsettings set org.gnome.desktop.background picture-uri file://{
 WALLPAPER_DIR = "~/Pictures/"
 
 
-def get_random_image_url(subreddit_page):
+def get_random_image_url(image_range):
     # Build request with dummy user agent (avoid being kickbanned)
-    request = urllib.request.Request("https://www.reddit.com/r/wallpaper#page=1", headers={'User-Agent': 'Wololo'})
+    request = urllib.request.Request("https://www.reddit.com/r/wallpaper/?count=0&limit=%s" % image_range, headers={'User-Agent': 'Wololo'})
     response = urllib.request.urlopen(request)
 
     # Get /r/wallpaper content
@@ -40,8 +40,11 @@ def get_file_from_url(url):
 
 
 @begin.start
-def run(subreddit_page=1):
-    image_url = get_random_image_url(subreddit_page)
+def run(image_range=25):
+    print("Picking random image.")
+    image_url = get_random_image_url(image_range)
+    print("Found %s, downloading..." % image_url)
     image_file = get_file_from_url(image_url)
     process = subprocess.Popen(SHELL_COMMAND.format(path=image_file.name), shell=True)
     process.wait()
+    print("Done !")
